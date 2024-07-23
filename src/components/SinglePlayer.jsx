@@ -1,10 +1,13 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import ajaxHelpers from '../API/ajaxHelpers';
 
 function SinglePlayer() {
   const { id } = useParams();
-  const [player, setPlayer] = useState(null);
   const navigate = useNavigate();
+  const [player, setPlayer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this player?')) {
@@ -23,43 +26,50 @@ function SinglePlayer() {
 
         console.log('Player deleted successfully');
 
-        // Handle successful deletion (e.g., navigate back to all players)
         navigate('/');
       } catch (error) {
         console.error('Error deleting player:', error);
-
-        // Handle API errors (e.g., display error message to user)
       }
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await fetchPlayerById(id);
-        setPlayer(data);
+        const fetchedPlayer = await ajaxHelpers.fetchPlayerById(id);
+        console.log('Fetched player:', fetchedPlayer);
+        setPlayer(fetchedPlayer.data.player || {});
       } catch (error) {
-        console.error('Error fetching player:', error);
+        console.error('Error in fetchData:', error);
+        setError(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [id]); // Dependency array includes `id` to refetch on ID change
+  }, [id]);
 
-  // ... your logic to conditionally render player details or loading message
+  if (isLoading) return <p>Loading player details...</p>;
+  if (error) return <p>Error fetching player details: {error.message}</p>;
+  if (!player) return <p>No player found.</p>;
 
   return (
     <div>
-      <h2>Player Details</h2>
+      {isLoading && <p>Loading player details...</p>}
+      {error && <p>Error fetching player details: {error.message}</p>}
       {player ? (
-        <>
-          {/* Render player information using player object */}
+        <div>
+          <h1>{player.name}</h1>
+          <p>Breed: {player.breed || 'Not Available'}</p>
+          <p>Team ID: {player.teamId || 'Not Available'}</p>
+          <img src={player.imageUrl} alt={player.name} />
           <button onClick={handleDelete}>Delete Player</button>
-        </>
+        </div>
       ) : (
-        <p>Loading player details...</p>
+        <p>No player found.</p>
       )}
-      <button onClick={handleBackClick}>Back</button>
     </div>
   );
 }

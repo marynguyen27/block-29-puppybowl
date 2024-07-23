@@ -12,6 +12,7 @@ function App() {
         <NavBar />
         <Routes>
           <Route path='/' exact element={<AllPlayers />} />
+          <Route path='/players' element={<AllPlayers />} />
           <Route path='/players/:id' element={<SinglePlayer />} />
           <Route path='/new-player' element={<NewPlayerForm />} />
         </Routes>

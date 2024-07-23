@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
+import './NewPlayerForm.css';
 
 function NewPlayerForm() {
   const [name, setName] = useState('');
-  const [position, setPosition] = useState('');
-  const [team, setTeam] = useState(''); // Add more state variables for other player details
+  const [TeamId, setTeamId] = useState('');
+  const [breed, setBreed] = useState('');
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
 
     try {
       const newPlayer = {
         name,
-        position,
-        team, // Add other player data properties
+        TeamId,
+        breed,
       };
 
       const baseUrl =
-        'https://fsa-puppy-bowl.herokuapp.com/api/2404-FTB-MT-WEB-PT'; // Replace with your API endpoint
+        'https://fsa-puppy-bowl.herokuapp.com/api/2404-FTB-MT-WEB-PT';
       const endpoint = '/players';
 
       const response = await fetch(`${baseUrl}${endpoint}`, {
@@ -26,20 +27,18 @@ function NewPlayerForm() {
       });
 
       if (!response.ok) {
-        throw new Error(`API call failed ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`API call failed ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
       console.log('Player created successfully:', data);
 
-      // Handle successful creation (e.g., clear form, redirect)
       setName('');
-      setPosition('');
-      setTeam(''); // Clear form fields after successful submission
+      setTeamId('');
+      setBreed('');
     } catch (error) {
       console.error('Error creating player:', error);
-
-      // Handle API errors (e.g., display error message to user)
     }
   };
 
@@ -53,21 +52,21 @@ function NewPlayerForm() {
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <label htmlFor='position'>Position:</label>
+
+      <label htmlFor='TeamId'>Team Id:</label>
       <input
         type='text'
-        id='position'
-        value={position}
-        onChange={(e) => setPosition(e.target.value)}
+        id='TeamId'
+        value={TeamId}
+        onChange={(e) => setTeamId(e.target.value)}
       />
-      <label htmlFor='team'>Team:</label>
+      <label htmlFor='breed'>Breed:</label>
       <input
         type='text'
-        id='team'
-        value={team}
-        onChange={(e) => setTeam(e.target.value)}
+        id='breed'
+        value={breed}
+        onChange={(e) => setBreed(e.target.value)}
       />
-      {/* Add more input fields for other player details */}
       <button type='submit'>Create Player</button>
     </form>
   );
